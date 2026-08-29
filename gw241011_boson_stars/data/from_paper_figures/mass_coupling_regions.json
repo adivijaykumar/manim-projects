@@ -1,0 +1,25 @@
+{
+  "_source": "extracted from Downloads/boson_star_constraints.pdf (vector paths + axis calibration), repulsive boson stars, m_b vs Lambda-tilde plane",
+  "mb_range": [6, 12],
+  "mb_unit": "1e-12 eV/c^2",
+  "excluded_region_gw241011": {
+    "mb_min": 7.32,
+    "mb_max": 10.57,
+    "log10_lambda_tilde_min": -75.2,
+    "log10_lambda_tilde_max": 1.0,
+    "note": "gray region; matches paper text mb in [7.32,10.6]x1e-12 eV exactly"
+  },
+  "no_stable_mass_configuration": {
+    "mb_min": -75.2,
+    "note": "orange hatched regions, mb < 7.32 or mb > 10.57, same log10(Lambda_tilde) vertical extent as excluded_region_gw241011 ([-75.2, 1.0])"
+  },
+  "no_stable_boson_stars": {
+    "log10_lambda_tilde_min": -89.1,
+    "log10_lambda_tilde_max": -75.2,
+    "note": "blue hatched band across full mb range shown"
+  },
+  "lambda_dm_reference_line": {
+    "log10_lambda_tilde": -8.45,
+    "note": "red dashed Lambda_tilde_DM(m_b) line, ~flat across the plotted mb range"
+  }
+}
