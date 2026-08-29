@@ -2,6 +2,8 @@ from manim import *
 import numpy as np
 import json
 import os
+import pandas as pd
+import scipy.stats
 
 BH_PRIMARY_COLOR = "#ff8c42"
 BH_SECONDARY_COLOR = "#ff6b6b"
@@ -295,8 +297,8 @@ class SpinInducedQuadrupole(Scene):
         self.wait(0.625)
 
         dist_axes = Axes(
-            x_range=[0.6, 1.6, 0.2],
-            y_range=[0, 7.5, 100],
+            x_range=[-1.0, 3.5, 0.5],
+            y_range=[0, 2.2, 10],
             x_length=8.5,
             y_length=2.8,
             axis_config={"include_ticks": False, "color": GREY},
@@ -304,19 +306,19 @@ class SpinInducedQuadrupole(Scene):
         )
         dist_axes.move_to(DOWN * 0.5)
 
-        mu, sigma_lo, sigma_hi = 1.10, 0.0669, 0.0547
+        df = pd.read_hdf(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "production_small_samples.h5"), key="samples")
+        kappa_samples = 1.0 + df["dQuadMon1"].dropna()
+        kde = scipy.stats.gaussian_kde(kappa_samples)
 
         def kappa_pdf(k):
-            sigma = sigma_lo if k < mu else sigma_hi
-            norm = np.sqrt(2 / np.pi) / (sigma_lo + sigma_hi)
-            return norm * np.exp(-0.5 * ((k - mu) / sigma) ** 2)
+            return float(kde(k).item())
 
-        dist_curve = dist_axes.plot(kappa_pdf, x_range=[0.65, 1.55, 0.005], color=HIGHLIGHT_COLOR, stroke_width=3)
-        dist_area = dist_axes.get_area(dist_curve, x_range=(0.65, 1.55), color=HIGHLIGHT_COLOR, opacity=0.25)
+        dist_curve = dist_axes.plot(kappa_pdf, x_range=[-1.0, 3.5, 0.05], color=HIGHLIGHT_COLOR, stroke_width=3)
+        dist_area = dist_axes.get_area(dist_curve, x_range=(-1.0, 3.5), color=HIGHLIGHT_COLOR, opacity=0.25)
 
-        bh_line = DashedLine(dist_axes.c2p(1.0, 0), dist_axes.c2p(1.0, 7.2), color=WHITE, stroke_width=2)
+        bh_line = DashedLine(dist_axes.c2p(1.0, 0), dist_axes.c2p(1.0, 2.0), color=WHITE, stroke_width=2)
         bh_label = Tex(r"black hole ($\kappa_1=1$)", font_size=22, color=WHITE)
-        bh_label.next_to(dist_axes.c2p(1.0, 7.2), UP, buff=0.1)
+        bh_label.next_to(dist_axes.c2p(1.0, 2.0), UP, buff=0.1)
 
         self.play(Create(dist_axes), run_time=0.75)
         self.play(Create(dist_curve), FadeIn(dist_area), run_time=1.5)
@@ -324,7 +326,7 @@ class SpinInducedQuadrupole(Scene):
 
         consistent_text = VGroup(
             Tex(r"Consistent with a black hole:", font_size=28, color=WHITE),
-            Tex(r"$\kappa_1 = 1.10^{+0.09}_{-0.11}$", font_size=28, color=HIGHLIGHT_COLOR),
+            Tex(r"$\kappa_1 = 1.0^{+0.86}_{-0.87}$", font_size=28, color=HIGHLIGHT_COLOR),
         ).arrange(DOWN, buff=0.2)
         consistent_text.next_to(dist_axes, DOWN, buff=0.35)
         self.play(Write(consistent_text), run_time=1.5)
@@ -400,7 +402,7 @@ class RepulsiveBosonStarsExcluded(Scene):
         self.play(Write(legend), run_time=1.25)
         self.wait(1.25)
 
-        blob_pts = [p for p in rep_data["blob"] if p[1] > 0.5]
+        blob_pts = [(p[0], max(p[1], 10**-0.2)) for p in rep_data["blob"]]
         blob_screen = [axes.c2p(x, y) for x, y in blob_pts]
         blob = Polygon(*blob_screen, color=HIGHLIGHT_COLOR, fill_color=HIGHLIGHT_COLOR,
                         fill_opacity=0.35, stroke_width=2)
@@ -477,7 +479,7 @@ class SolitonicStarsAllowed(Scene):
         self.play(Write(legend), run_time=1.25)
         self.wait(1.25)
 
-        blob_pts = [p for p in sol["blob"] if p[1] > 0.5]
+        blob_pts = [(p[0], max(p[1], 10**-0.25)) for p in sol["blob"]]
         blob_screen = [axes.c2p(x, y) for x, y in blob_pts]
         blob = Polygon(*blob_screen, color=HIGHLIGHT_COLOR, fill_color=HIGHLIGHT_COLOR,
                         fill_opacity=0.35, stroke_width=2)
